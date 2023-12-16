@@ -1,4 +1,4 @@
-1) This project run on http://localhost:38943
+1) This project run on http://localhost:38943 in News Folder ther is api project and News.Test there is test project
 2) [(http://localhost:38943/swagger)http://localhost:38943/swagger on this url swagger will open  in sagger "/api/Story/GetStories" will come
 3) There is only web api fot initially show default record after that search and accoring paging show data.
 4) There is 2 project one for web api and other for Test project
@@ -19,9 +19,10 @@ OFFSET
     (@Page - 1) * @PageSize ROWS
 FETCH NEXT
     @PageSize ROWS ONLY;
+   end
 
-END
-==============================
+
+
 CREATE TABLE [dbo].[Story](
 	[Title] [varchar](50) NULL,
 	[CreatedAt] [datetime] NOT NULL,
