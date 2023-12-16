@@ -1,8 +1,9 @@
 1) This project run on http://localhost:38943 in News Folder ther is api project and News.Test there is test project
-2) [(http://localhost:38943/swagger)http://localhost:38943/swagger on this url swagger will open  in sagger "/api/Story/GetStories" will come
-3) There is only web api fot initially show default record after that search and accoring paging show data.
-4) There is 2 project one for web api and other for Test project
-5) Below is sp for getting  data and Table script
+2) I am fetching 10 record in place of 200 record for testing purpose
+3) [(http://localhost:38943/swagger)http://localhost:38943/swagger on this url swagger will open  in sagger "/api/Story/GetStories" will come
+4) There is only web api fot initially show default record after that search and accoring paging show data.
+5) There is 2 project one for web api and other for Test project
+6) Below is sp for getting  data and Table script
 
 
 Create PROCEDURE [dbo].[GetNewList] 
