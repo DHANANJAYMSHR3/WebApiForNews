@@ -3,7 +3,8 @@
 3) There is only web api fot initially show default record after that search and accoring paging show data.
 4) There is 2 project one for web api and other for Test project
 5) Below is sp for getting  data and Table script
-========================
+
+
 Create PROCEDURE [dbo].[GetNewList] 
  @Page INT =1,
  @PageSize INT = 10,
