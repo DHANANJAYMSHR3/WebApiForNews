@@ -21,7 +21,7 @@ FETCH NEXT
     @PageSize ROWS ONLY;
    end
 
-
+6)Table script
 
 CREATE TABLE [dbo].[Story](
 	[Title] [varchar](50) NULL,
