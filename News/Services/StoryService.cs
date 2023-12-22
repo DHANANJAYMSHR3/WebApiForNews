@@ -30,22 +30,17 @@ namespace News.Services
             {
                 // Make API requests using the httpClient instance
                 HttpResponseMessage response = await httpClient.GetAsync(_configuration.GetValue<string>("ApiUrl:BaseUrl") + "topstories.json?print=pretty");
-
                 // Process the response
                 if (response.IsSuccessStatusCode)
                 {
                     string responseData = await response.Content.ReadAsStringAsync();
                     // Deserialize the JSON array to a list of integers
                     List<int> idList = JsonConvert.DeserializeObject<List<int>>(responseData);
-                    // Create a list of Shop instances with Id property set
-                    //List<StoryDetail> story = idList.Select(id => new StoryDetail { id = id }).ToList();
                     return idList;
                     
                 }
                 else
                 {
-                    // Handle error cases
-                    // For example, log the error or throw an exception
                 }
             }
             return new List<int>();
@@ -65,12 +60,9 @@ namespace News.Services
                     // Deserialize the JSON array to a list of integers
                     StoryDetail storyDetails = JsonConvert.DeserializeObject<StoryDetail>(responseData);
                     return storyDetails;
-                    // Process the response body
                 }
                 else
                 {
-                    // Handle error cases
-                    // For example, log the error or throw an exception
                 }
             }
             return new StoryDetail();

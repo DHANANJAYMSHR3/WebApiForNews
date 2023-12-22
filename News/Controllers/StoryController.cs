@@ -29,32 +29,37 @@ namespace News.Controllers
         [Route("GetStories")]
         public async Task<ActionResult<List<StoryDetail>>> GetStories()
         {
-            string cacheKey = $"NewestStories";
-
-            // Try to get the stories from the cache
-            if (_cache.TryGetValue(cacheKey, out List<StoryDetail> cachedStories))
+            try
             {
-                return Ok(cachedStories);
+                string cacheKey = $"NewestStories";
+                // Try to get the stories from the cache
+                if (_cache.TryGetValue(cacheKey, out List<StoryDetail> cachedStories))
+                {
+                    return Ok(cachedStories);
+                }
+                var stories = await _storyService.GetStorys();
+                var cacheEntryOptions = new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5),
+                    SlidingExpiration = TimeSpan.FromMinutes(1) // Refresh the cache if not accessed within this time
+                };
+                _cache.Set(cacheKey, stories, cacheEntryOptions);
+                return Ok(stories.Select(id => new StoryDetail { id = id }).ToList());
             }
-            var stories = await _storyService.GetStorys();
-            
-            var cacheEntryOptions = new MemoryCacheEntryOptions
+            catch
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5),
-                SlidingExpiration = TimeSpan.FromMinutes(1) // Refresh the cache if not accessed within this time
-            };
-            _cache.Set(cacheKey, stories, cacheEntryOptions);
-            return Ok(stories.Select(id => new StoryDetail { id = id }).ToList());
+                return new StatusCodeResult(500);
+            }
         }
 
-       
+
         [HttpGet]
         [Route("GetStoryDetail")]
         public async Task<ActionResult<StoryDetail>> GetStoryDetail(int id=0)
         {
+            try 
+            { 
             string cacheKey = $"StoriesDetail_"+id;
-
-            // Try to get the stories from the cache
             if (_cache.TryGetValue(cacheKey, out List<StoryDetail> cachedStories))
             {
                 return Ok(cachedStories);
@@ -65,11 +70,14 @@ namespace News.Controllers
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5),
                 SlidingExpiration = TimeSpan.FromMinutes(1) // Refresh the cache if not accessed within this time
             };
-
             _cache.Set(cacheKey, stories, cacheEntryOptions);
-          
-            return Ok(stories);
-        }
+             return Ok(stories);
+            }
+            catch
+            {
+                return new StatusCodeResult(500);
+            }
+}
 
     }
 }
