@@ -5,49 +5,80 @@ using News.Interface;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Net.Http;
+using Newtonsoft.Json;
+using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json.Linq;
+using System.Linq;
 
 namespace News.Services
 {
     public class StoryService : IStoryService
     {
-        private readonly SqlConnection _sqlConnection;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private IConfiguration _configuration;
 
-        public StoryService(SqlConnection sqlConnection)
+        public StoryService(IHttpClientFactory clientFactory, IConfiguration configuration)
         {
-            _sqlConnection = sqlConnection;
+            _httpClientFactory = clientFactory;
+            _configuration = configuration;
         }
-
-
-        public async Task<List<Story>> GetNewestStories(int page, int itemsPerPage, string searchTerm)
+        public async Task<List<int>> GetStorys()
         {
-            
 
-            using (SqlCommand command = new SqlCommand("GetNewList", _sqlConnection))
+            using (var httpClient = _httpClientFactory.CreateClient("Story"))
             {
-                command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.Add("@Page", SqlDbType.Int).Value = page;
-                command.Parameters.Add("@PageSize", SqlDbType.Int).Value = itemsPerPage;
-                command.Parameters.Add("@SearchTerm", SqlDbType.VarChar, 255).Value = searchTerm;
-                await _sqlConnection.OpenAsync();
-                using var reader = await command.ExecuteReaderAsync();
-                var stories = new List<Story>();
-                while (await reader.ReadAsync())
+                // Make API requests using the httpClient instance
+                HttpResponseMessage response = await httpClient.GetAsync(_configuration.GetValue<string>("ApiUrl:BaseUrl") + "topstories.json?print=pretty");
+
+                // Process the response
+                if (response.IsSuccessStatusCode)
                 {
-                    // Map reader columns to Story object properties
-                    var story = new Story
-                    {
-                        
-                        Title = reader.GetString(reader.GetOrdinal("Title")),
-                        UrlPath = reader.GetString(reader.GetOrdinal("Url")),
-                        // Add other properties as needed
-                    };
-
-                    stories.Add(story);
+                    string responseData = await response.Content.ReadAsStringAsync();
+                    // Deserialize the JSON array to a list of integers
+                    List<int> idList = JsonConvert.DeserializeObject<List<int>>(responseData);
+                    // Create a list of Shop instances with Id property set
+                    //List<StoryDetail> story = idList.Select(id => new StoryDetail { id = id }).ToList();
+                    return idList;
+                    
                 }
-                return stories;
+                else
+                {
+                    // Handle error cases
+                    // For example, log the error or throw an exception
+                }
             }
+            return new List<int>();
+          
         }
+        public async Task<StoryDetail> GetStorysDetail(int id)
+        {
 
+            using (var httpClient = _httpClientFactory.CreateClient("Story"))
+            {
+                // Make API requests using the httpClient instance
+                HttpResponseMessage response = await httpClient.GetAsync(_configuration.GetValue<string>("ApiUrl:BaseUrl") + "item/"+id+".json?print=pretty");
+                // Process the response
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseData = await response.Content.ReadAsStringAsync();
+                    // Deserialize the JSON array to a list of integers
+                    StoryDetail storyDetails = JsonConvert.DeserializeObject<StoryDetail>(responseData);
+                    return storyDetails;
+                    // Process the response body
+                }
+                else
+                {
+                    // Handle error cases
+                    // For example, log the error or throw an exception
+                }
+            }
+            return new StoryDetail();
+            
+        }
+   
     }
+
 }
+
 

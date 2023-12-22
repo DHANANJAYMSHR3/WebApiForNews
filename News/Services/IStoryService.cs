@@ -7,6 +7,8 @@ namespace News.Interface
 {
     public interface IStoryService
     {
-        Task<List<Story>> GetNewestStories(int page, int itemsPerPage,string searchterm);
+        // Task<List<StoryDetail>> GetStorys();
+        Task<List<int>> GetStorys();
+        Task<StoryDetail> GetStorysDetail(int id);
     }
 }

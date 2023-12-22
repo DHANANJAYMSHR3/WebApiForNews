@@ -7,10 +7,11 @@ using News.Model;
 using News.Interface;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.AspNetCore.Cors;
+using System.Linq;
 
 namespace News.Controllers
 {
-   
+
     [ApiController]
     [Route("api/[controller]")]
     [EnableCors]
@@ -26,22 +27,39 @@ namespace News.Controllers
 
         [HttpGet]
         [Route("GetStories")]
-        public async Task<ActionResult<List<Story>>> GetStories(int page = 1,int itemsPerPage = 10,string searchTerm = "")
+        public async Task<ActionResult<List<StoryDetail>>> GetStories()
         {
-            try 
-            { 
-            if (page < 1 || itemsPerPage < 1)
-            {
-                return BadRequest("Invalid page or itemsPerPage values.");
-            }
-            string cacheKey = $"NewestStories_{page}_{itemsPerPage}_{searchTerm}";
+            string cacheKey = $"NewestStories";
 
             // Try to get the stories from the cache
-            if (_cache.TryGetValue(cacheKey, out List<Story> cachedStories))
+            if (_cache.TryGetValue(cacheKey, out List<StoryDetail> cachedStories))
             {
                 return Ok(cachedStories);
             }
-            var stories = await _storyService.GetNewestStories(page, itemsPerPage, searchTerm);
+            var stories = await _storyService.GetStorys();
+            
+            var cacheEntryOptions = new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5),
+                SlidingExpiration = TimeSpan.FromMinutes(1) // Refresh the cache if not accessed within this time
+            };
+            _cache.Set(cacheKey, stories, cacheEntryOptions);
+            return Ok(stories.Select(id => new StoryDetail { id = id }).ToList());
+        }
+
+       
+        [HttpGet]
+        [Route("GetStoryDetail")]
+        public async Task<ActionResult<StoryDetail>> GetStoryDetail(int id=0)
+        {
+            string cacheKey = $"StoriesDetail_"+id;
+
+            // Try to get the stories from the cache
+            if (_cache.TryGetValue(cacheKey, out List<StoryDetail> cachedStories))
+            {
+                return Ok(cachedStories);
+            }
+            var stories = await _storyService.GetStorysDetail(id);
             var cacheEntryOptions = new MemoryCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5),
@@ -49,12 +67,9 @@ namespace News.Controllers
             };
 
             _cache.Set(cacheKey, stories, cacheEntryOptions);
+          
             return Ok(stories);
         }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
+
     }
 }
