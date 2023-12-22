@@ -7,8 +7,8 @@ namespace News.Model
 {
     //public class Story
     //{
-        
-    //    public int Id { get; set; }
+
+    //    public int id { get; set; }
     //}
     // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
     public class StoryDetail
